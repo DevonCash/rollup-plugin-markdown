@@ -16,7 +16,7 @@ jobs:
         with:
           args: build
       - name: cleanup
-        run: rm -rf eslint.json rollup.config.js yarn.lock node_modules source test
+        run: rm -rf eslint.json rollup.config.js yarn.lock source test
       - name: release
         uses: actions/create-release@v1
         env:
