@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: install
-        uses: CultureHQ/actions/yarn@master
+        uses: CultureHQ/actions-yarn@master
         with:
           args: install
       - name: build
