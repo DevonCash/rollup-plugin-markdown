@@ -1,0 +1,4 @@
+name: build-release
+on:
+  push: 
+    branches: [master]
