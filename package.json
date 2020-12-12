@@ -18,8 +18,7 @@
   "scripts": {
     "lint": "eslint --config eslintrc.json ./source/*.js && eslint --config eslintrc.json ./test/*.js",
     "test": "mocha --require reify test/*.js",
-    "build": "rollup --config rollup.config.js",
-    "prepublish": "git checkout ./source/markdown.js && yarn build && yarn lint && yarn test"
+    "build": "rollup --config rollup.config.js"
   },
   "author": "Vijith Assar",
   "license": "MIT",

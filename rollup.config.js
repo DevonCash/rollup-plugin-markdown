@@ -1,7 +1,7 @@
 import { terser } from 'rollup-plugin-terser'
 
 export default {
-  input: './index.js',
+  input: './source/markdown.js',
   output: [{
     name: 'rollup-plugin-markdown',
     file: 'dist/markdown.js',
