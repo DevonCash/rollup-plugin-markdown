@@ -2,7 +2,7 @@ import MagicString from 'magic-string';
 import { createFilter } from 'rollup-pluginutils';
 
 // export a function that can take configuration options
-const markdown = (options = {}) => {
+const markdown = (options = { validLangs: ['js', 'javascript'] }) => {
 
     // include or exclude files
     const filter = createFilter(options.include, options.exclude);
@@ -18,7 +18,7 @@ const markdown = (options = {}) => {
         transform: (code, id) => {
 
             // exit without transforming if the filter prohibits this id
-            if (! filter(id)) {
+            if (!filter(id)) {
                 return null;
             }
 
@@ -36,17 +36,17 @@ const markdown = (options = {}) => {
             const even_fences = fences.length % 2 === 0;
             const has_fences = fences.length > 0;
 
-            if (! even_fences || ! has_fences) {
-                const self = {code: code};
+            if (!even_fences || !has_fences) {
+                const self = { code: code };
                 if (sourcemap) {
-                    self.map = magicstring.generateMap({hires: true});
+                    self.map = magicstring.generateMap({ hires: true });
                 }
                 return self;
             }
 
             // track whether we're inside a code block
             let code_block = false;
-            let js_code_block = false;
+            let valid_code_block = false;
             let position = 0;
             // determine which lines to include in the output
             const line_data = lines
@@ -58,17 +58,21 @@ const markdown = (options = {}) => {
                     // toggle the code block
                     const backticks = string.slice(0, 3) === '```';
                     if (backticks) {
-                        code_block = ! code_block;
+                        code_block = !code_block;
                     }
-                    const js_backticks = string.slice(0, 5) === '```js' || string.slice(0, 13) === '```javascript';
-                    if (js_backticks) {
-                        js_code_block = ! js_code_block;
+                    // Read the options for valid language extensions
+                    // toggle code block if valid extension
+                    const valid_backticks = options.validLangs.reduce(
+                        (prev, lng) => prev || string.slice(0, lng.length + 3) === '```' + lng
+                        , false);
+                    if (valid_backticks) {
+                        valid_code_block = !valid_code_block;
                     }
                     const line = {
                         line: string,
                         start: start,
                         end: end,
-                        include: code_block && js_code_block && ! backticks && ! js_backticks
+                        include: code_block && valid_code_block && !backticks && !valid_backticks
                     };
                     return line;
                 });
@@ -86,7 +90,7 @@ const markdown = (options = {}) => {
 
             // attach sourcemap
             if (sourcemap) {
-                result.map = magicstring.generateMap({hires: true});
+                result.map = magicstring.generateMap({ hires: true });
             }
 
             return result;
