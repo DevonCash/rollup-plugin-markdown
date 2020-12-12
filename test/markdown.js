@@ -53,8 +53,8 @@ describe('rollup-plugin-markdown', () => {
         const markdown = '# heading\ntext\n```lang\nfn()\n```';
         const expected = 'fn()';
         const processed = lines(markdown).pop();
-        assert.strictEqual(processed, expected)
-    })
+        assert.strictEqual(processed, expected);
+    });
     it('ignores code without a language annotation after opening fence', () => {
         const markdown = '# heading\ntext\n```\na()\n```\ntext\n```javascript\nb()\n```';
         const expected = 'b()';
