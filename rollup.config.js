@@ -6,7 +6,6 @@ export default {
     name: 'rollup-plugin-markdown',
     file: 'dist/markdown.js',
     format: 'umd',
-    plugins: [terser()],
     globals: {
       'magic-string': 'MagicString',
       'rollup-pluginutils': 'rollupPluginutils'

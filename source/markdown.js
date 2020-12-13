@@ -10,7 +10,7 @@ const markdown = (options = { validLangs: ['js', 'javascript'] }) => {
     // disable sourcemaps if you want for some reason
     const sourcemap = options.sourceMap !== false && options.sourcemap !== false;
 
-    const plugin = {
+    return {
 
         name: 'markdown',
 
@@ -18,9 +18,7 @@ const markdown = (options = { validLangs: ['js', 'javascript'] }) => {
         transform: (code, id) => {
 
             // exit without transforming if the filter prohibits this id
-            if (!filter(id)) {
-                return null;
-            }
+            if (!filter(id)) return;
 
             // load source code string into MagicString for transformation
             const magicstring = new MagicString(code);
@@ -84,22 +82,16 @@ const markdown = (options = { validLangs: ['js', 'javascript'] }) => {
                 }
             });
 
-            const result = {
-                code: magicstring.toString()
+            conso
+
+            return {
+                code: magicstring.toString(),
+                map: sourceMap ? magicstring.generateMap({ hires: true }) : null
             };
-
-            // attach sourcemap
-            if (sourcemap) {
-                result.map = magicstring.generateMap({ hires: true });
-            }
-
-            return result;
 
         }
 
     };
-
-    return plugin;
 
 };
 

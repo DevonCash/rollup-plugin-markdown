@@ -1,1 +1,103 @@
-!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t(require("magic-string"),require("rollup-pluginutils")):"function"==typeof define&&define.amd?define(["magic-string","rollup-pluginutils"],t):(e=e||self)["rollup-plugin-markdown"]=t(e.MagicString,e.rollupPluginutils)}(this,(function(e,t){"use strict";e=e&&Object.prototype.hasOwnProperty.call(e,"default")?e.default:e;return(n={validLangs:["js","javascript"]})=>{const r=t.createFilter(n.include,n.exclude),i=!1!==n.sourceMap&&!1!==n.sourcemap;return{name:"markdown",transform:(t,l)=>{if(!r(l))return null;const u=new e(t),o=t.split("\n"),s=o.filter((e=>"```"===e.slice(0,3))),c=s.length%2==0,a=s.length>0;if(!c||!a){const e={code:t};return i&&(e.map=u.generateMap({hires:!0})),e}let p=!1,d=!1,g=0;o.map((e=>{const t=g,r=g+e.length;g=r+1;const i="```"===e.slice(0,3);i&&(p=!p);const l=n.validLangs.reduce(((t,n)=>t||e.slice(0,n.length+3)==="```"+n),!1);l&&(d=!d);return{line:e,start:t,end:r,include:p&&d&&!i&&!l}})).forEach((e=>{!1===e.include&&u.remove(e.start,e.end)}));const f={code:u.toString()};return i&&(f.map=u.generateMap({hires:!0})),f}}}}));
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('magic-string'), require('rollup-pluginutils')) :
+    typeof define === 'function' && define.amd ? define(['magic-string', 'rollup-pluginutils'], factory) :
+      (global = global || self, global['rollup-plugin-markdown'] = factory(global.MagicString, global.rollupPluginutils));
+}(this, (function (MagicString, rollupPluginutils) {
+  'use strict';
+
+  MagicString = MagicString && Object.prototype.hasOwnProperty.call(MagicString, 'default') ? MagicString['default'] : MagicString;
+
+  // export a function that can take configuration options
+  const markdown = (options = { validLangs: ['js', 'javascript'] }) => {
+
+    // include or exclude files
+    const filter = rollupPluginutils.createFilter(options.include, options.exclude);
+
+    // disable sourcemaps if you want for some reason
+    const sourcemap = options.sourceMap !== false && options.sourcemap !== false;
+
+    return {
+
+      name: 'markdown',
+
+      // transform source code
+      transform: (code, id) => {
+
+        // exit without transforming if the filter prohibits this id
+        if (!filter(id)) return;
+
+        // load source code string into MagicString for transformation
+        const magicstring = new MagicString(code);
+
+        // spit input code string along newlines
+        const lines = code.split('\n');
+
+        // if it doesn't look like a valid Markdown document containing
+        // a reasonable number of code blocks, exit immediately and
+        // return the input
+
+        const fences = lines.filter(item => item.startsWith('```'));
+        const even_fences = fences.length % 2 === 0;
+        const has_fences = fences.length > 0;
+
+        if (!even_fences || !has_fences) {
+          const self = { code: code };
+          if (sourcemap) {
+            self.map = magicstring.generateMap({ hires: true });
+          }
+          return self;
+        }
+
+        // track whether we're inside a code block
+        let code_block = false;
+        let valid_code_block = false;
+        let position = 0;
+        // determine which lines to include in the output
+        const line_data = lines
+          .map((string, idx, a) => {
+            const start = position;
+            const end = position + string.length;
+            position = end + 1;
+            // every time a set of backticks is detected,
+            // toggle the code block
+
+            const line = {
+              line: string,
+              start: start,
+              end: end,
+              include: code_block
+            };
+
+            const valid_backticks = options.validLangs.reduce((prev, lng) => prev || string.startsWith('```' + lng), false);
+
+            if (valid_backticks) {
+              code_block = true;
+            } else if (string.startsWith('```')) {
+              code_block = false;
+              line.include = false;
+            }
+
+            return line;
+          });
+
+
+        // remove excluded lines
+        line_data.forEach(line => {
+          if (line.include === false)
+            magicstring.remove(line.start, line.end);
+        });
+
+        return {
+          code: magicstring.toString(),
+          map: sourcemap ? magicstring.generateMap({ hires: true }) : null
+        };
+
+      }
+
+    };
+
+  };
+
+  return markdown;
+
+})));
